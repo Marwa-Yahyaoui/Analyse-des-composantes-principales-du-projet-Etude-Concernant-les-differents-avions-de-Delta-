@@ -1,0 +1,307 @@
+---
+title: "Untitled"
+author: "yahyaoui marwa"
+date: "19 avril 2016"
+output: 
+  html_document: 
+    keep_md: yes
+    theme: cerulean
+    toc: yes
+---
+
+#1.Résumé
+Ce travail est une étude sur les différents avions de "Delta Air Lines" 
+Nous avons travaillé sur une base de données contenant des variables indépendantes .Nous avons obtenu à l'aide d'une étude statistique qui mesure les différents caractéristique des Avions et on a remarqué qu'ils sont corrélées.
+Dont on a utilisé un ensemble de données intéressantes sur lesquelles on peut faire une analyse , car il possède à la fois des informations quantitatives et qualitatives et est relativement complexe. 
+
+#2.introduction
+
+Delta Air Lines :c'est  une compagnie aérienne américaine Fondée en 1924 sous le nom de Huff Daland Dusters,  est devenue la principale compagnie au monde avec  avec 75 000 employés, desservant 375 destinations dans 66 pays,transportant chaque année plus de 160 millions de voyageurs vers leur destination. Son chiffre d'affaires est de 35,11 milliards de dollars USD (2011).
+Alors Que pouvons-nous dire sur les différents avions de Delta ?sur Quels plans sont similaires ? et sur Quels sont dissemblables ?
+
+#3.Données
+
+Nous avons obtenu notre base de le site Web de Delta
+
+L'ensemble de données comprend 33 variables sur 44 avions pris de <Delta.com >, y compris des mesures quantitatives sur des attributs tels que la vitesse de croisière , l'hébergement et la gamme de miles , ainsi que des données catégoriques sur, disons , si un aéronef particulier a une connexion Wi -Fi ou vidéo . Ces variables catégorielles binaires ont été transformées en variables quantitatives en leur attribuant des valeurs de 1 ou 0 , pour oui ou non , respectivement .
+33 variables : représentant les différents caractéristique des Avions :
+ -Seat Width Club : Siège Largeur Club           
+ -Seat Pitch Club : Siège Emplacement Club
+ -Seat Club : Siège Club
+ -Seat Width First Class : Siège Largeur First Class
+ -Seat Pitch First Class : Siège Pitch First Class
+ -Seats First Class :  Sièges First Class
+ -Seat Width Business : Siège Largeur d'affaires
+ -Seat Pitch Business : Siège Pas d'affaires
+ -Seats Business : Affaires -Sièges
+ -Seat Width Eco.Comfort :Siège Largeur Eco.Comfort
+ -Seat Pitch Eco.Comfort : Siège Pas Eco.Comfort
+ -Seats Eco Comfort : Sièges Eco Confort
+ -Seat Width Economy : Siège Economie Largeur
+ -Seat Pitch Economy : Siège Emplacement Economie
+ -Seats Economy : Economie -Sièges
+ -Accommodation : Hébergement 
+ -Cruising Speed mph : Vitesse -Cruising mph
+ -Cruising Speed mph :Vitesse -Cruising mph
+ -Range miles : miles -range 
+ -Engines : Moteurs
+ -Wingspan ft : ft -Wingspan
+ -Tail Height ft : tail Hauteur ft
+ -Length ft :  ft -Longueur
+ -Wifi: 
+ -Video :
+ -Power : Puissance
+ -Satellite : Satellite
+ -Flat.bed : lit plat :
+ -Sleeper : Sleeper
+ -Club : Club
+ -First.Class : Première classe
+ -Business : Entreprise 
+ -Eco.Comfort : Eco.Comfort
+ -Economy : Économie
+44 observations :représentant 44 modèles d'Avion  dont la lettre A désigne l'Arbus et la lettre B désigne Boeing.
+
+#4.Méthodologie
+Comment pouvons- nous visualisons plus facile un jeu comme celui-ci des données de grande dimension ? 
+En utilisant une technique de réduction de dimensionnalité , comme l'analyse en composantes principales .
+
+Tout d'abord, on a extrait du jeu de données initial les variables actives qui permettent de décrire les caractéristiques des Avion. 
+
+Le travail va être comme suit :
+
+1- X est une matrice 44*33, 44:nombre d'observations, 34:nombre de variables.
+
+2- centrer et réduire X.
+
+3- V=(1/44)X'X matrice de var qui est définie positive.
+
+4- diagonaliser V.
+
+5- projection sur le premier plan principal.
+
+On a utilisé Rstudio et la version 3.2.2 du logiciel R pour faire cette analyse en composantes principales et plus précisément la commande "FactoMineR". 
+Ceci est le code exécuté pour réaliser notre ACP :
+
+```{r}
+data <- read.table(file.choose(), header=T, sep=",", row.names=1)
+View(data)
+summary(data)
+
+```
+
+
+
+```{r,echo=F}
+str(data)
+attach(data)
+data$Economy = as.factor (data$Economy)
+data$Eco.Comfort= as.factor (data$Eco.Comfort)
+data$Business= as.factor (data$Business)
+data$First.Class= as.factor (data$First.Class)
+data$Club= as.factor (data$Club)
+data$ Sleeper= as.factor (data$Sleeper)
+data$Flat.bed = as.factor (data$Flat.bed )
+data$Satellite  = as.factor (data$Satellite )
+data$Power  = as.factor (data$Power )
+data$Video   = as.factor (data$Video  )
+data$ Wifi  = as.factor (data$Wifi)
+data$Engines   = as.factor (data$Engines )
+```
+
+
+#5-Analyse multivariée :
+##5.1.Analyse en Composantes Principales (ACP) :
+```{r}
+library(FactoMineR)
+res.pca=PCA(data,quali.sup=c(1,19,23:33))
+res.pca$eig
+
+```
+
+
+
+
+```{r}
+
+library(ggplot2)
+library(grid)
+library(factoextra)
+library(plotly)
+barplot(res.pca$eig[,1],main="valeurs propres",names.arg=paste("dim",1:nrow(res.pca$eig)))
+
+```
+
+
+##5.2Etude de la qualité de l'ACP
+###* Les valeurs propres :
+On constate qu'uniquement les 2 premières valeurs propres sont très grandes .Donc ,on va choisir les deux premiers axes qui présentent 73.70% de l'inertie totale,et il suffit de projeter les observations sur ces 2 axes pour obtenir le maximum des informations disponibles.
+
+Ceci est parce que l'échelle des différentes variables dans l'ensemble de données est très variable ; nous pouvons le voir en traçant la variance des différentes colonnes dans la trame de données ( mise à l'échelle régulière sur la gauche , logarithmique à droite)
+
+```{r}
+# verify by plotting variance of columns
+mar <- par()$mar
+par(mar=mar+c(0,5,0,0))
+barplot(sapply(data, var), horiz=T, las=1, cex.names=0.8)
+barplot(sapply(data, var), horiz=T, las=1, cex.names=0.8, log='x')
+par(mar=mar)
+
+```
+
+
+##5.3.Interprétations : 
+
+```{r}
+
+p2=fviz_pca_var(res.pca, geom=c("point","text"),col.var="cos2")
+p2
+
+```
+
+
+D'après le cercle de corrélation on déduit que les variables sont bien représentées.  La première composante résume 50.02% de l'inertie totale alors que la deuxième présente 23.68% de la contribution totale.
+
+
+
+les variables quantitatives relatives aux caractéristiques physiques de l'avion comme la vitesse de croisière ,l' hébergement totale , et d'autres quantités comme la longueur et d'envergure, sont fortement corrélés avec le premier axe Donc, on peut considérer l'axe 1 comme axe des caractéristiques physiques de l'avion. 
+
+Les variables des sièges sont fortement corrélés avec l'axe 2 prenant l'exemple de Seat.Width..First.Class et  Seats..Eco.Comfort donc
+on peut considérer que le deuxième axe est l'axe des sièges .
+
+
+###* Corrélation entre les variables:
+
+la variable  Seat.Width..Business est corrélée négativement avec la variable Seat.Width..first.class et ceci est due aux diferance entre les différant sièges chacune a ses propres caractéristique . 
+
+Nous pouvons voir qu'il y a assez de fortes corrélations positives entre les variables quantitatives relatives aux caractéristiques physiques de l'avion, comme chacun d'entre eux sont liés à la taille globale de l'avion . Remarquablement il existe une relation presque parfaitement linéaire entre la hauteur d'envergure et de la queue, qui est peut-être liée à un principe de l'ingénierie aéronautique dont je suis pas au courant.
+avec :
+_L'envergure d'une aile c'est la largueure totale de l'avion 
+_ Longueur de la corde moyenne c'est la distance entre le bord d'attaque et le bord de fuite ,à un endroit donné de l'aile.
+
+ En revanche, les variables Seat.Width..Economy et Seats.width.First.Class ne sont pas corrélés entre eux ( ils forment un angle de 90°) car une siégé ne peut pas être à la fois première classe et économique  
+
+Ces interprétations peuvent être affinés a l'aide des résultats numériques.
+
+##5.4.contribution des individus par rapport à la première axe
+
+
+```{r}
+fviz_pca_contrib(res.pca , choice="ind" ,axes=1)
+
+```
+
+##5.5.contribution des individus par rapport à la deuxième axe
+
+```{r}
+fviz_pca_contrib(res.pca , choice="ind" ,axes=2)
+
+```
+
+##5.6.Eboulis des valeurs propres/Scree pot
+
+```{r}
+p3=fviz_screeplot(res.pca)
+p3
+```
+
+
+##5.7.représentation des individus
+
+```{r}
+library(factoextra)
+
+
+p1=fviz_pca_ind(res.pca,geom=c("point","text"),col.ind = "cos2")+scale_color_gradient2(low='blue',mid='white',high='red',midpoint=0.5) 
+p1
+
+# habillage selon la variable Business
+
+p4=fviz_pca_ind(res.pca,habillage=30,label=T,addEllipses=T)
+p4
+p5=fviz_pca_biplot(res.pca, label="var", select.ind = list(contrib = 44)) 
+
+p5
+```
+
+
+
+
+
+```{r}
+p1<-res.pca$ind$coord[,1]
+p1
+p2<-res.pca$ind$coord[,2]
+p2
+pc<-data.frame(cbind(p1,p2))
+ggplot(pc, aes(p1,p2, label=rownames(pc))) + geom_text(data=pc, aes(x = p1, y= p2 , color=First.Class , fill=Accommodation   )) + geom_point()
+
+```
+
+
+
+
+
+##6.classification des modeles des Avion selon les siéges
+
+Dans cette partie on va regrouper les Avion selon ces modeles pour mieux visualiser les differentes caracteristique de chaque  modele : 
+-Airbus
+-Boeing
+-CRJ
+-E
+-MD
+
+###6.1 modele Arbus
+
+```{r}
+dataA=data[1:8,]
+res.pcaA=PCA(dataA,quali.sup=c(1,19,23:33))
+
+pA=fviz_pca_biplot(res.pcaA,col.var="cos2",select.ind = list(contrib =8))
+pA
+View(dataA)
+
+```
+
+
+####interpretation :
+
+D'après le cercle de corrélation on déduit que les variables sont bien représentées.  La première composante résume 69.5% de l'inertie totale alors que la deuxième présente 29.1% de la contribution totale.
+
+on remarque que les disignations des axes n'ont pas changé puisque on n'a pas changé les variables on a seullement reduit le nombre des individus 
+
+on peut voir clairement que les individus Airbus A330-200 (3L2), Airbus A330-200 (3L3),et Airbus 330_300 sont bien corrolées avec la variable seats.Business donc on conclue que ces avion comportent essentiellement les siéges d'affaires.
+
+en revanche on remarque que Airbus A317 VIP est bien corrolé avec les variables seats.irst.class et seats.club en effet cet avion ne fait pas partie de la flotte réguliére de Delta ,mais l'un des jets d'affaires d'Airbus .ceci est un plan pour les personnes avec de l'argent,pour l'affrétement privé. il comprend "siéges de club " autour des tbles pour traviller (ou non) .
+voici une image de l'intérieur de l'A319 VIP :
+
+
+
+
+###6.1 modele Boeing
+```{r}
+dataB=data[9:33,]
+res.pcaB=PCA(dataB,quali.sup=c(1,19,23:33))
+
+pB=fviz_pca_biplot(res.pcaB,col.var="cos2",select.ind = list(contrib =8))
+pB
+
+```
+
+
+
+```{r}
+dataC=data[33:44,]
+res.pcaC=PCA(dataC,quali.sup=c(1,19,23:33))
+
+pC=fviz_pca_biplot(res.pcaC,col.var="cos2",select.ind = list(contrib =8))
+pC
+
+
+```
+
+
+
+
+
+
+
